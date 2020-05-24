@@ -16,11 +16,13 @@ DEADZONE_YAW_AXIS = .3
 
 #==============================================================================
 
+sendBuffer = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
 pygame.init()
 pygame.joystick.init()
 joystick = pygame.joystick.Joystick(0).init()
 
-arduino = serial.Serial("COM4", 115200)
+arduino = serial.Serial("COM6", 115200)
 time.sleep(1)
 
 def getThrottle():
@@ -42,7 +44,7 @@ while True:
     
     while arduino.in_waiting == 0: pass
     arduino.reset_input_buffer()
-    for i in range(0, 4):
+    for i in range(4):
         raw = pygame.joystick.Joystick(0).get_axis(i)
 
         if raw > 1 or raw < -1:
@@ -50,8 +52,14 @@ while True:
             else: raw = -1
         if abs(raw) < getDeadzoneFromAxis(i): raw = 0
 
-        axis_value = int((raw + 1) * 256 / 2)
-
+        axis_value = int((raw + 1) * 256 / 2) - 1
+        if axis_value < 0: axis_value = 0
         toSend = axis_value
+        sendBuffer[i] = toSend
+    
+    for i in range(12):
+        sendBuffer[i + 4] = pygame.joystick.Joystick(0).get_button(i)
 
-        arduino.write(bytes([toSend]))
+    bytesWritten = arduino.write(bytearray(sendBuffer))
+    if bytesWritten == 16: print("Successfully sent all bytes")#, and y = {}".format(sendBuffer[1]))
+    else: print("Write unsuccessfull, only wrote " + str(bytesWritten) + " bytes")

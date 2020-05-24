@@ -1,1 +1,13 @@
 .vscode/
+.vs/
+*.vcxproj
+*.vcxproj.user
+Debug/
+*.sln
+*.vcxproj.*
+*.exe
+node_modules/
+*.gvdesign
+*.code-workspace
+package-lock.json
+package.json

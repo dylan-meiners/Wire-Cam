@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="../../node_modules/socket.io-client/dist/socket.io.js"></script>
+        <link rel="stylesheet" type="text/css" href="../css/main.css" />
+        <style>@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap');</style>
+        <title>Insight</title>
+    </head>
+    <body>
+        <div class="nav">
+            <a class="dashboard_a nav_active" href="#">Dashboard</a>
+            <a class="backend_a" href="#">Backend</a>
+        </div>
+        <div class="content">
+            <div class="dashboard page">
+                <img src="../../media/yellow-sc.png" class="left_winch_image winch" width="100px">
+                <img src="../../media/yellow-sc.png" class="right_winch_image winch" width="100px">
+                <div class="connections">
+                    <p>
+                        <span>JavaScript connection to server:</span>
+                        <span class="js_conn status bad">Disconncted</span>
+                    </p>
+                    <p>
+                        <span>C++ connection to Server:</span>
+                        <span class="c_conn status bad">Disconncted</span>
+                    </p>
+                </div>
+            </div>
+            <div class="backend page">
+                <div class="container">
+                    <div class="backend-status-labels">
+                        <p class="status-label">Connection to server:</p>
+                        <span class="c_conn bad">Disconnected</span>
+                        <div class="spacer"></div>
+                        <p class="status-label">Connection to Arduino:</p>
+                        <span class="c_a_conn bad">Disconnected</span>
+                    </div>
+                    <div class="textarea-div">
+                        <div class="console"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="../js/script.js"></script>
+    </body>
+</html>
