@@ -1,5 +1,8 @@
 window.$ = window.jQuery = require('jquery')
 
+var WIDTH = 87;
+var HEIGHT = 80;
+
 var activePage = "";
 var old_active_a = ".dashboard_a"
 var old_page = ".dashboard"
@@ -10,6 +13,8 @@ var leftPosition = 0;
 var rightPosition = 0;
 var leftDirection = "";
 var rightDirection = "";
+var x = 0;
+var y = 0;
 
 var socket = io.connect('http://localhost:3000')
 socket.emit("message", "vj")
@@ -17,7 +22,7 @@ socket.emit("message", "vj")
 socket.on("message", ProcessMessage);
 
 $(document).ready(function() {
-    setInterval(update, 250)
+    setInterval(update, 50)
 
     $(".nav a").click(function() {
         $(old_active_a).removeClass("nav_active")
@@ -27,6 +32,7 @@ $(document).ready(function() {
         else if (old_active_a == ".backend_a") loadPage(".backend")
         else (console.log("Page invalid"))
     })
+
     $(".dashboard").hide()
     $(".backend").hide()
     loadPage(".dashboard")
@@ -51,8 +57,10 @@ function ProcessMessage(msg) {
             rightPosition = parseInt(msg.slice(msg.indexOf("_1") + 2, msg.indexOf("_2")))
             leftDirection = msg.slice(msg.indexOf("_2") + 2, msg.indexOf("_3"))
             rightDirection = msg.slice(msg.indexOf("_3") + 2, msg.indexOf("_4"))
-            if (msg.slice(msg.indexOf("_4") + 2, msg.length) == "connected") cToArduinoStatus = true;
+            if (msg.slice(msg.indexOf("_4") + 2, msg.indexOf("_5")) == "connected") cToArduinoStatus = true;
             else cToArduinoStatus = false;
+            x = msg.slice(msg.indexOf("_5") + 2, msg.indexOf("_6"))
+            y = msg.slice(msg.indexOf("_6") + 2, msg.length)
             //rightPosition = parseInt()
             console.log(leftPosition + " | " + rightPosition + " | " + leftDirection + " | " + rightDirection);
             var childs = $(".console").children().toArray()
@@ -65,7 +73,7 @@ function ProcessMessage(msg) {
             }
             $(".console").append("<span style=\"color: blue\">" + msg.slice(1, msg.indexOf(">")) + "</span>")
             $(".console").append("<span style=\"color: green\">" + msg.slice(msg.indexOf(">"), msg.indexOf(">") + 1) + "</span>")
-            $(".console").append("<span style=\"color: red\">" + msg.slice(msg.indexOf(">") + 1, msg.length) + "</span><br>")
+            $(".console").append("<span style=\"color: red\">" + msg.slice(msg.indexOf(">") + 1, msg.length) + "</span><div class=\"spacer\"/>")
             $(".console").scrollTop($(".console")[0].scrollHeight)
             break
         case "z":
@@ -140,13 +148,19 @@ function update() {
     else if (rightDirection == "idle") $(".right_winch_image").attr("src", "../../media/yellow-sc.png")
     else {
         $(".right_winch_image").attr("src", "../../media/blue-sc.png")
-        console.log("Invalid direction or no data")
+        //console.log("Invalid direction or no data")
     }
     if (leftDirection == "out") $(".left_winch_image").attr("src", "../../media/red-sc.png")
     else if (leftDirection == "in") $(".left_winch_image").attr("src", "../../media/green-sc.png")
     else if (leftDirection == "idle") $(".left_winch_image").attr("src", "../../media/yellow-sc.png")
     else {
         $(".left_winch_image").attr("src", "../../media/blue-sc.png")
-        console.log("Invalid direction or no data")
+        //console.log("Invalid direction or no data")
     }
+    console.log("X: " + x + " | Y: " + y);
+    $(".cplane").css("max-width", ($(".connections").offset().top - 10) * WIDTH / HEIGHT)
+    $(".cplane").css("height",  $(".cplane").width() * HEIGHT / WIDTH)
+    $(".gimbal-image").css("top", y / HEIGHT * $(".cplane-inner").height())
+    $(".gimbal-image").css("left", x / WIDTH * $(".cplane-inner").width())
+    //$(".gimbal").css({top: y, left: x})
 }

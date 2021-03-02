@@ -19,6 +19,9 @@ class Winch {
 
                 m_motorSpeedToSet = 0;
             #endif
+
+            m_positionOffset = CENTER_POSITION_IN_CLICKS;
+            m_position = 0;
         }
 
         /*
@@ -30,16 +33,16 @@ class Winch {
             int deltaPosition;
             if (relative) {
             
-                deltaPosition = m_position + positionToGoto;
+                deltaPosition = GetPosition() + positionToGoto;
             }
             else {
                 
-                deltaPosition = m_position - positionToGoto;
+                deltaPosition = GetPosition() - positionToGoto;
             }
 
             deltaPosition = (deltaPosition < -13 || deltaPosition > 13) ? ((deltaPosition < -13) ? -13 : 13) : deltaPosition;
-            //Get speedToSet from a regression
-            int speedToSet = RoundLit((-0.0155218855 * pow(deltaPosition, 3)) + (4.329004329 * pow(10, -4) * (deltaPosition * deltaPosition)) + (12.47895623 * deltaPosition) + 127.3722944);
+            //Get speedToSet from a regression (negative to flip over x axis)
+            int speedToSet = RoundLit(-((-0.0155218855 * pow(deltaPosition, 3)) + (4.329004329 * pow(10, -4) * (deltaPosition * deltaPosition)) + (12.47895623 * deltaPosition)) + 127.3722944);
             //If the speedToSet is outside of an unsigned char, make it be in-bounds
             speedToSet = (speedToSet > 255 || speedToSet < 0) ? ((speedToSet > 255) ? 255 : 0) : speedToSet;
             //If the speedToSet is within 1 of off, set the speed to 0
@@ -66,9 +69,20 @@ class Winch {
         Returns true if targetPosition is not set or if we made it to the target
         position.
         */
-        void GotoTargetPosition(const bool relative = false) {
+        unsigned char GotoTargetPosition(const bool relative = false) {
             
-            GotoPosition(m_targetPosition, relative);
+            if (m_targetPosition != -1) { return GotoPosition(m_targetPosition, relative); }
+            else return 127;
+        }
+
+        bool ShouldSetANewTarget() {
+
+            if (GotoTargetPosition() == 127) {
+
+                m_targetPosition = -1;
+                return true;
+            }
+            else return false;
         }
 
         unsigned int Jog(const bool in) {
@@ -81,7 +95,7 @@ class Winch {
 
         void Zero() {
 
-            m_position = centerPositionInClicks;
+            m_positionOffset = CENTER_POSITION_IN_CLICKS - m_position;
         }
 
         void SetTargetPosition(const int targetPositionToSet) {
@@ -91,7 +105,12 @@ class Winch {
 
         int GetPosition() {
 
-            return m_position;
+            return m_position + m_positionOffset;
+        }
+
+        int GetTargetPosition() {
+
+            return m_targetPosition;
         }
 
         bool TargetPositionSet() {
@@ -108,6 +127,7 @@ class Winch {
         #endif
 
         int m_position;
+        int m_positionOffset;
 
     private:
 

@@ -62,20 +62,39 @@ p {
     position: relative;
 }
 
-.dashboard .winch {
+.dashboard .display {
+    margin-top: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+}
+
+.display img {
+    align-self: flex-start;
+}
+
+.dashboard .cplane {
+    margin-left: 10px;
+    margin-right: 10px;
+    flex-grow: 1;
+    display: flex;
+    position: relative;
+    border: 1px solid var(--accent);
+}
+
+.cplane-inner {
+    margin: 25px;
+    flex-grow: 1;
+    border: 1px solid var(--light);
+}
+
+.dashboard .gimbal-image {
     position: absolute;
     top: 0;
-    margin-top: 10px;
-}
-
-.dashboard .left_winch_image {
     left: 0;
-    margin-left: 10px;
-}
-
-.dashboard .right_winch_image {
-    right: 0;
-    margin-right: 10px;
 }
 
 .connections {
@@ -83,6 +102,7 @@ p {
     bottom: 0;
 }
 .connections p, .connections span {
+    display: inline;
     font-size: 20px;
 }
 
@@ -127,7 +147,17 @@ p {
     background-color: black;
     border: 1px solid var(--accent);
     color: white;
-    font-size: 20px;
+    padding: 0;
+    line-height: 15px;
+}
+
+.console .spacer {
+    height: 0;
+}
+
+.console span, .console p {
+    font-family: "Consolas";
+    font-size: 15px;
 }
 
 .accent_text {

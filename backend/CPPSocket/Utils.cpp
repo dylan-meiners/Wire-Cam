@@ -9,5 +9,6 @@ int RoundLit(double x) {
     if (x >= 0) { return (x - (int)x >= .5) ? (int)x + 1 : (int)x; }
     else { return -((-x - (int)-x >= .5) ? (int)-x + 1 : (int)-x); }
 }
-double radians(double x) { return M_PI / 180 * x; }
+double Radians(double x) { return M_PI / 180 * x; }
+double Degrees(double x) { return 180 / M_PI * x; }
 double sq(double x) { return x * x; }

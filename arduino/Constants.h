@@ -3,6 +3,11 @@
 
 #include "Utils.h"
 
+//#ifdef VIRTUAL_WINCHES
+const double CLICKS_PER_500_MICROSECONDS_PER_SECOND = 20.0;
+//const int TIME_PER_500_MICROSECONDS_FULL_REVOLUTION = 1;
+//#endif
+
 const int LEFT_ENCODER_CLK_PIN = 2;
 const int LEFT_ENCODER_DT_PIN = 4;
 

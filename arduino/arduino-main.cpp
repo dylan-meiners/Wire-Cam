@@ -1,8 +1,10 @@
+#define VIRTUAL_WINCHES
+
 #include "Arduino.h"
 #include "Servo.h"
 
 #include "Encoder.h"
-#include "C:\\Users\\dylan\\Desktop\\Github\\Wire-Cam\\cpp\\arduino\\Constants.h"
+#include "C:\\Users\\dylan\\Desktop\\Coding\\Wire-Cam_LOCAL_COPY\\arduino\\Constants.h"
 #include "SerialUtils.h"
 
 Encoder * leftEncoder = (Encoder*)malloc(sizeof(*leftEncoder));
@@ -30,38 +32,44 @@ rightEncoderPos     long    (4 bytes)
 TOTALS                              8 bytes
 */
 
-int leftSpeedToSet;
-int rightSpeedToSet;
+int leftSpeedToSet = 127;
+int rightSpeedToSet = 127;
 
 Servo leftMotor;
 Servo rightMotor;
 
 bool shouldWrite = false;
 
+#ifndef VIRTUAL_WINCHES
 void UpdateEncoders() {
 
     leftEncoder->Update();
     rightEncoder->Update();    
 }
+#endif
 
 void setup() {
 
     Serial.begin(57600);
 
-    pinMode(2, INPUT);
-    pinMode(4, INPUT);
-    pinMode(RIGHT_ENCODER_CLK_PIN, INPUT);
-    pinMode(RIGHT_ENCODER_DT_PIN, INPUT);
     pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN, LOW);
-    attachInterrupt(digitalPinToInterrupt(2), UpdateEncoders, CHANGE);
-    attachInterrupt(digitalPinToInterrupt(RIGHT_ENCODER_CLK_PIN), UpdateEncoders, CHANGE);
 
-    leftMotor.attach(7);
-    //rightMotor.attach(RIGHT_MOTOR_PIN);
+    #ifndef VIRTUAL_WINCHES
+    pinMode(LEFT_ENCODER_CLK_PIN, INPUT);
+    pinMode(LEFT_ENCODER_DT_PIN, INPUT);
+    pinMode(RIGHT_ENCODER_CLK_PIN, INPUT);
+    pinMode(RIGHT_ENCODER_DT_PIN, INPUT);
+    attachInterrupt(digitalPinToInterrupt(LEFT_ENCODER_CLK_PIN), UpdateEncoders, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(RIGHT_ENCODER_CLK_PIN), UpdateEncoders, CHANGE);
+    leftMotor.attach(LEFT_MOTOR_PIN);
+    rightMotor.attach(RIGHT_MOTOR_PIN);
+    #endif
 
     leftEncoder = new Encoder(LEFT_ENCODER_CLK_PIN, LEFT_ENCODER_DT_PIN);
     rightEncoder = new Encoder(RIGHT_ENCODER_CLK_PIN, RIGHT_ENCODER_DT_PIN);
+    
+    clearSerial();
 }
 
 void loop() {
@@ -72,17 +80,23 @@ void loop() {
         rightSpeedToSet = (int)Serial.read();
         clearSerial();
         shouldWrite = true;
-        //if (leftSpeedToSet == 127 && rightSpeedToSet == 127) digitalWrite(LED_BUILTIN, HIGH);
-        //selse digitalWrite(LED_BUILTIN, LOW);
     }
-    else { shouldWrite = false; }
-    leftMotor.writeMicroseconds(map(leftSpeedToSet, 0, 255, 1000, 2000));
-    //rightMotor.writeMicroseconds(map(rightSpeedToSet, 0, 255, 1000, 2000));
+    else shouldWrite = false;
+
+    #ifndef VIRTUAL_WINCHES
+    leftMotor.writeMicroseconds(MapUCharToMicroseconds(leftSpeedToSet));
+    rightMotor.writeMicroseconds(MapUCharToMicroseconds(rightSpeedToSet));
+    #else
+    leftEncoder->m_virtual_speedToSet = RoundLit(MapUCharToMicroseconds(leftSpeedToSet) - 1500);
+    rightEncoder->m_virtual_speedToSet = RoundLit(MapUCharToMicroseconds(rightSpeedToSet) - 1500);
+    leftEncoder->VirtualUpdate();
+    rightEncoder->VirtualUpdate();
+    #endif
 
     if (shouldWrite) {
         
         leftMotorPositionToSend = leftEncoder->GetPosition();
-        rightMotorPositionToSend = 0;//rightEncoder->GetPosition();
+        rightMotorPositionToSend = rightEncoder->GetPosition();
         memcpy(txBuffer, &leftMotorPositionToSend, sizeof(long));
         memcpy(txBuffer + 4, &rightMotorPositionToSend, sizeof(long));
         Serial.write(txBuffer, 8);
