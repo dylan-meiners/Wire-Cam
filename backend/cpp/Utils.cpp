@@ -1,6 +1,6 @@
 #define _USE_MATH_DEFINES
 
-#include "Utils.h"
+#include "../include/Utils.h"
 #include <math.h>
 
 double PythagC(const double a, const double b) { return sqrt(sq(a) + sq(b)); }

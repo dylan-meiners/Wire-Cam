@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include <time.h>
 #include <ctime>
+#include <string>
 
 class Socket {
 

@@ -1,12 +1,13 @@
-#include "Constants.h"
-#include "SerialPort.h"
-#include "Winch.h"
-#include "WireCam.h"
-#include "Joystick.h"
-#include "Utils.h"
-#include "conio.h"
-#include "ConfigParser.h"
-#include "Socket.h"
+#include <conio.h>
+
+#include "../include/Constants.h"
+#include "../include/SerialPort.h"
+#include "../include/Winch.h"
+#include "../include/WireCam.h"
+#include "../include/Joystick.h"
+#include "../include/Utils.h"
+#include "../include/ConfigParser.h"
+#include "../include/Socket.h"
 
 int result = system("CLS");
 
@@ -40,7 +41,7 @@ leftPos_1rightPos_2leftDirection_3rightDirection_4arduinoConnection_5x_6x
 
 int main() {
 
-    ConfigParser parser("C:\\Users\\dylan\\Desktop\\Coding\\Wire-Cam_LOCAL_COPY\\MASTER_CONFIG.txt");
+    ConfigParser parser("T:\\Documents\\Coding\\Coding\\Wire-Cam\\MASTER_CONFIG.txt");
     SerialPort arduino(TEXT("COM4"), true, true);
     Socket frontend("http://localhost:3000");
 
