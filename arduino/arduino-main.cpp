@@ -1,10 +1,10 @@
-#define VIRTUAL_WINCHES
+//#define VIRTUAL_WINCHES
 
 #include "Arduino.h"
 #include "Servo.h"
 
 #include "Encoder.h"
-#include "C:\\Users\\dylan\\Desktop\\Coding\\Wire-Cam_LOCAL_COPY\\arduino\\Constants.h"
+#include "T:\\Documents\\Coding\\Coding\\Wire-Cam\\arduino\\Constants.h"
 #include "SerialUtils.h"
 
 Encoder * leftEncoder = (Encoder*)malloc(sizeof(*leftEncoder));

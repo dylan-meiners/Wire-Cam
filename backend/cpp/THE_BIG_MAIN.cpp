@@ -41,6 +41,16 @@ leftPos_1rightPos_2leftDirection_3rightDirection_4arduinoConnection_5x_6x
 
 int main() {
 
+    std::vector<std::vector<double>> x = { {1, 0, 2, 4, 1}, {0, 1, 0, 4, 2}, {2, 0, 1, 4, 3} };
+    std::vector<std::vector<double>> y = rref(x);
+    std::cout << "Finished rref" << std::endl;
+    PrintVector(y);
+
+    return 0;
+}
+
+int mains() {
+
     ConfigParser parser("T:\\Documents\\Coding\\Coding\\Wire-Cam\\MASTER_CONFIG.txt");
     SerialPort arduino(TEXT("COM4"), true, true);
     Socket frontend("http://localhost:3000");
@@ -77,9 +87,12 @@ int main() {
     bool shouldRun = true;
     while (shouldRun) {
 
-        CaptureInput(pilot);
-        CorrectAxis(pilot, false, true, true, false);
-        CorrectDeadzones(pilot);
+        //CaptureInput(pilot);
+        //CorrectAxis(pilot, false, true, true, false);
+        //CorrectDeadzones(pilot);
+        pilot->trigger = false;
+        pilot->twelve = true;
+        pilot->y = -1.0;
 
         //std::cout << pilot->x << std::endl;
         

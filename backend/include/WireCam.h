@@ -106,14 +106,18 @@ class WireCam {
         void Fly(LogitechExtreme3DPro * pilot) {
 
             if (pilot->twelve) Jog(pilot);
-            else if (pilot->three) FlyByWire(pilot);
+            else {
+
+                Stop();
+            }
+            /*else if (pilot->three) FlyByWire(pilot);
             else if (pilot->thumb) {
 
                 m_thisToArduinoSendBuffer[0] = m_leftWinch->GotoPosition(400);
                 m_thisToArduinoSendBuffer[1] = m_rightWinch->GotoPosition(400);
             }
             else if (pilot->seven) Zero();
-            else AutoFly(pilot, 5);
+            else AutoFly(pilot, 5);*/
         }
 
     private:
