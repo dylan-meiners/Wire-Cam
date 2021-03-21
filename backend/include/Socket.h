@@ -1,3 +1,5 @@
+#pragma once
+
 #include "sio_client.h"
 #include "sio_message.h"
 #include <Windows.h>

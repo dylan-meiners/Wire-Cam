@@ -1,9 +1,11 @@
-#pragma once
-#define _USE_MATH_DEFINES
+#ifndef WIRECAM_H
+#define WIRECAM_H
 
 #include "Winch.h"
 #include "Joystick.h"
 #include "Utils.h"
+#include "Constants.h"
+#include <vector>
 #include <math.h>
 
 class WireCam {
@@ -19,14 +21,20 @@ class WireCam {
 
         void Stop() {
 
-            m_thisToArduinoSendBuffer[0] = m_leftWinch->Stop();
-            m_thisToArduinoSendBuffer[1] = m_rightWinch->Stop();
+            m_leftWinch->Stop();
+            m_rightWinch->Stop();
         }
 
         void Zero() {
 
             m_leftWinch->Zero();
             m_rightWinch->Zero();
+        }
+
+        void UpdateBuffer() {
+
+            m_thisToArduinoSendBuffer[0] = StandardToUCharRange(m_leftWinch->GetSpeed());
+            m_thisToArduinoSendBuffer[1] = StandardToUCharRange(m_rightWinch->GetSpeed());
         }
 
         double GetArcCosTopLeftAngle() {
@@ -53,71 +61,59 @@ class WireCam {
 
             if (pilot->eleven) {
 
-                m_thisToArduinoSendBuffer[1] = m_rightWinch->Stop();
+                m_rightWinch->Stop();
                 //If we WANNA GET GOIN
                 if (pilot->y != 0) {
 
-                    if (pilot->y < 0) { m_thisToArduinoSendBuffer[0] = m_leftWinch->Jog(true); }
-                    else { m_thisToArduinoSendBuffer[0] = m_leftWinch->Jog(false); }
+                    if (pilot->y < 0) m_leftWinch->Jog(true);
+                    else m_leftWinch->Jog(false);
                 }
-                else m_thisToArduinoSendBuffer[0] = m_leftWinch->Stop();
+                else m_leftWinch->Stop();
             }
             else {
 
-                m_thisToArduinoSendBuffer[0] = m_leftWinch->Stop();
+                m_leftWinch->Stop();
                 //If we WANNA GET GOIN
                 if (pilot->y != 0) {
 
-                    if (pilot->y < 0) { m_thisToArduinoSendBuffer[1] = m_rightWinch->Jog(true); }
-
-                    else { m_thisToArduinoSendBuffer[1] = m_rightWinch->Jog(false); }
+                    if (pilot->y < 0) m_rightWinch->Jog(true);
+                    else m_rightWinch->Jog(false);
                 }
-                else m_thisToArduinoSendBuffer[1] = m_rightWinch->Stop();
+                else m_rightWinch->Stop();
             }
         }
 
-        void AutoFly(LogitechExtreme3DPro * pilot, const int amountInInches = 0) {
-            
-            //If both winches do not have a target position set, then get a new
-            //position to give to them
-            if (m_leftWinch->ShouldSetANewTarget() && m_rightWinch->ShouldSetANewTarget()) {
+        void FlyByWire(LogitechExtreme3DPro* pilot) {
 
-                if (pilot->five) { //left
-
-                    m_leftWinch->SetTargetPosition(RoundLit(PythagC(GetX() - amountInInches, GetY()) * inchesToClicksMultiplier));
-                    m_rightWinch->SetTargetPosition(RoundLit(PythagC(width - (GetX() - amountInInches), GetY()) * inchesToClicksMultiplier));
-                }
-                else if (pilot->six) { //right
-
-                    m_leftWinch->SetTargetPosition(RoundLit(PythagC(GetX() + amountInInches, GetY()) * inchesToClicksMultiplier));
-                    m_rightWinch->SetTargetPosition(RoundLit(PythagC(width - (GetX() + amountInInches), GetY()) * inchesToClicksMultiplier));
-                }
-            }
-
-            m_thisToArduinoSendBuffer[0] = m_leftWinch->GotoTargetPosition();
-            m_thisToArduinoSendBuffer[1] = m_rightWinch->GotoTargetPosition();
-        }
-
-        void FlyByWire(LogitechExtreme3DPro * pilot) {
-
-            //TODO ACTUALLY WRITE THIS FUNCTION
+            double angle = StandardDegrees(pilot->x, pilot->y);
+            double magnitude = PythagC(pilot->x, pilot->y);
+            double targetX = cos(angle * (M_PI / 180.0)) * magnitude * TARGET_MAGNITUDE_SCALAR;
+            double targetY = sin(angle * (M_PI / 180.0)) * magnitude * TARGET_MAGNITUDE_SCALAR;
+            std::vector<std::vector<double>> system;
+            system.push_back(std::vector<double>());
+            system[0].push_back(WINCH_1_X - GetX());
+            system[0].push_back(WINCH_2_X - GetX());
+            system[0].push_back(targetX);
+            system.push_back(std::vector<double>());
+            system[1].push_back(WINCH_1_Y - GetY());
+            system[1].push_back(WINCH_2_Y - GetY());
+            system[1].push_back(targetY);
+            std::vector<std::vector<double>> solved = rref(system);
+            //PrintVector(solved);
+            //std::cout << std::endl;
+            double x = solved[0][2];
+            double y = solved[1][2];
+            m_leftWinch->Set(x);
+            m_rightWinch->Set(y);
         }
 
         void Fly(LogitechExtreme3DPro * pilot) {
 
             if (pilot->twelve) Jog(pilot);
-            else {
-
-                Stop();
-            }
-            /*else if (pilot->three) FlyByWire(pilot);
-            else if (pilot->thumb) {
-
-                m_thisToArduinoSendBuffer[0] = m_leftWinch->GotoPosition(400);
-                m_thisToArduinoSendBuffer[1] = m_rightWinch->GotoPosition(400);
-            }
+            else if (pilot->three) FlyByWire(pilot);
             else if (pilot->seven) Zero();
-            else AutoFly(pilot, 5);*/
+            else Stop();
+            //else AutoFly(pilot, 5);
         }
 
     private:
@@ -126,3 +122,5 @@ class WireCam {
         Winch *m_rightWinch;
         unsigned char * m_thisToArduinoSendBuffer;
 };
+
+#endif

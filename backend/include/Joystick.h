@@ -1,8 +1,9 @@
-#pragma once
+#ifndef JOYSTICK_H
+#define JOYSTICK_H
 
 #include <Windows.h>
 
-struct LogitechExtreme3DPro {
+typedef struct LogitechExtreme3DPro {
 
     UINT id;
     double x_deadzone;
@@ -24,7 +25,7 @@ struct LogitechExtreme3DPro {
     bool ten;
     bool eleven;
     bool twelve;
-};
+} LogitechExtreme3DPro;
 
 LogitechExtreme3DPro* _LogitechExtreme3DPro(const UINT id,
                                             const double x_deadzone = 0.0,
@@ -39,16 +40,18 @@ LogitechExtreme3DPro* _LogitechExtreme3DPro(const UINT id,
     return p;
 }
 
-bool CaptureInput(LogitechExtreme3DPro * joystick) {
+bool CaptureInput(LogitechExtreme3DPro* joystick, const bool useKeyboard = false) {
 
-    JOYINFOEX joyinfo;
-    joyinfo.dwSize = sizeof(joyinfo);
-    joyinfo.dwFlags = JOY_RETURNALL;
-    MMRESULT errorCode = joyGetPosEx(joystick->id, &joyinfo);
-    switch (errorCode) {
+    if (!useKeyboard) {
+
+        JOYINFOEX joyinfo;
+        joyinfo.dwSize = sizeof(joyinfo);
+        joyinfo.dwFlags = JOY_RETURNALL;
+        MMRESULT errorCode = joyGetPosEx(joystick->id, &joyinfo);
+        switch (errorCode) {
 
         case JOYERR_NOERROR:
-            
+
             joystick->x = ((joyinfo.dwXpos + 1) / 32768.0) - 1;
             joystick->y = ((joyinfo.dwYpos + 1) / 32768.0) - 1;
             joystick->throttle = ((joyinfo.dwZpos + 1) / 32768.0) - 1;
@@ -66,30 +69,50 @@ bool CaptureInput(LogitechExtreme3DPro * joystick) {
             joystick->eleven = joyinfo.dwButtons & JOY_BUTTON11;
             joystick->twelve = joyinfo.dwButtons & JOY_BUTTON12;
             return true;
-        
+
         case JOYERR_UNPLUGGED:
-        
+
             std::cout << "Joystick unplugged" << std::endl;
             return false;
 
         case JOYERR_PARMS:
-            
+
             std::cout << "Invalid parameters given to joyGetPosEx!" << std::endl;
             return false;
-        
+
         case JOYERR_NOCANDO:
-        
+
             std::cout << "Cannot get joystick input" << std::endl;
             return false;
-        
+
         case MMSYSERR_NODRIVER:
-        
+
             std::cout << "No active joystick driver available" << std::endl;
             return false;
-        
+
         default:
             std::cout << "Unknown error getting joystick data" << std::endl;
             return false;
+        }
+    }
+    else {
+
+        joystick->x =           (GetKeyDown('D') ? 1.0 : 0.0) + (GetKeyDown('A') ? -1.0 : 0.0);
+        joystick->y =           (GetKeyDown('W') ? 1.0 : 0.0) + (GetKeyDown('S') ? -1.0 : 0.0);
+        joystick->throttle =    0.0;
+        joystick->z =           0.0;
+        joystick->trigger =     GetKeyDown(VK_RETURN);
+        joystick->thumb =       GetKeyDown('2');
+        joystick->three =       GetKeyDown(VK_SPACE);
+        joystick->four =        GetKeyDown('4');
+        joystick->five =        GetKeyDown('5');
+        joystick->six =         GetKeyDown('6');
+        joystick->seven =       GetKeyDown('7');
+        joystick->eight =       GetKeyDown('8');
+        joystick->nine =        GetKeyDown('9');
+        joystick->ten =         GetKeyDown('0');
+        joystick->eleven =      GetKeyDown('N');
+        joystick->twelve =      GetKeyDown('M');
     }
 }
 
@@ -111,3 +134,5 @@ void CorrectDeadzones(LogitechExtreme3DPro * joystick) {
     if (abs(joystick->y) < joystick->y_deadzone) joystick->y = 0;
     if (abs(joystick->z) < joystick->z_deadzone) joystick->z = 0;
 }
+
+#endif

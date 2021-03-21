@@ -1,5 +1,3 @@
-#pragma once
-
 #define _USE_MATH_DEFINES
 
 #include "../include/Utils.h"
@@ -18,6 +16,11 @@ int RoundLit(double x) {
 double Radians(double x) { return M_PI / 180 * x; }
 double Degrees(double x) { return 180 / M_PI * x; }
 double sq(double x) { return x * x; }
+unsigned char StandardToUCharRange(const double x) {
+
+    int toReturn = (int)((x + 1.0) * 256 / 2.0 - 1);
+    return toReturn > 0 ? (unsigned char)toReturn : 0;
+}
 
 void PrintVector(std::vector<double>& x) {
 
@@ -178,4 +181,52 @@ std::vector<std::vector<double>> rref(std::vector<std::vector<double>> &x) {
     }
 
     return result;
+}
+
+double StandardDegrees(const double i, const double j) {
+
+    double calculatedAngle = 0;
+
+    //Quadrant I
+    if (i > 0 && j > 0) {
+
+        calculatedAngle = atan(j / i) * (180 / M_PI);
+    }
+    //Quadrant II
+    else if (i < 0 && j > 0) {
+
+        calculatedAngle = 180 - atan(j / -i) * (180 / M_PI);
+    }
+    //Quadrant III
+    else if (i < 0 && j < 0) {
+
+        calculatedAngle = 180 + atan(-j / -i) * (180 / M_PI);
+    }
+    //Quadrant IV
+    else if (i > 0 && j < 0) {
+
+        calculatedAngle = 360 - atan(-j / i) * (180 / M_PI);
+    }
+    else if (i == 0 && j > 0) {
+
+        calculatedAngle = 90;
+    }
+    else if (i == 0 && j < 0) {
+
+        calculatedAngle = 270;
+    }
+    else if (i > 0 && j == 0) {
+
+        calculatedAngle = 0;
+    }
+    else if (i < 0 && j == 0) {
+
+        calculatedAngle = 180;
+    }
+    return calculatedAngle;
+}
+
+bool GetKeyDown(int key) {
+
+    return GetKeyState(key) & 0x8000;
 }

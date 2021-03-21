@@ -1,7 +1,7 @@
 window.$ = window.jQuery = require('jquery')
 
-var WIDTH = 87;
-var HEIGHT = 80;
+var WIDTH = 81;
+var HEIGHT = 98.5;
 
 var activePage = "";
 var old_active_a = ".dashboard_a"

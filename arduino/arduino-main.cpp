@@ -1,4 +1,4 @@
-//#define VIRTUAL_WINCHES
+#define VIRTUAL_WINCHES
 
 #include "Arduino.h"
 #include "Servo.h"
@@ -7,8 +7,8 @@
 #include "T:\\Documents\\Coding\\Coding\\Wire-Cam\\arduino\\Constants.h"
 #include "SerialUtils.h"
 
-Encoder * leftEncoder = (Encoder*)malloc(sizeof(*leftEncoder));
-Encoder * rightEncoder = (Encoder*)malloc(sizeof(*rightEncoder));
+Encoder* leftEncoder = (Encoder*)malloc(sizeof(*leftEncoder));
+Encoder* rightEncoder = (Encoder*)malloc(sizeof(*rightEncoder));
 
 unsigned char rxBuffer[2] = {0};//(unsigned char*)malloc(2);
 /*

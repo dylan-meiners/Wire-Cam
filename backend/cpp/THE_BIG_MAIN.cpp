@@ -1,13 +1,13 @@
 #include <conio.h>
 
-#include "../include/Constants.h"
-#include "../include/SerialPort.h"
-#include "../include/Winch.h"
-#include "../include/WireCam.h"
-#include "../include/Joystick.h"
-#include "../include/Utils.h"
-#include "../include/ConfigParser.h"
-#include "../include/Socket.h"
+#include "Constants.h"
+#include "SerialPort.h"
+#include "Winch.h"
+#include "WireCam.h"
+#include "Joystick.h"
+#include "Utils.h"
+#include "ConfigParser.h"
+#include "Socket.h"
 
 int result = system("CLS");
 
@@ -39,7 +39,7 @@ STRING COMPOSITION IS AS FOLLOWS:
 leftPos_1rightPos_2leftDirection_3rightDirection_4arduinoConnection_5x_6x
 */
 
-int main() {
+int mains() {
 
     std::vector<std::vector<double>> x = { {1, 0, 2, 4, 1}, {0, 1, 0, 4, 2}, {2, 0, 1, 4, 3} };
     std::vector<std::vector<double>> y = rref(x);
@@ -49,10 +49,10 @@ int main() {
     return 0;
 }
 
-int mains() {
+int main() {
 
     ConfigParser parser("T:\\Documents\\Coding\\Coding\\Wire-Cam\\MASTER_CONFIG.txt");
-    SerialPort arduino(TEXT("COM4"), true, true);
+    SerialPort arduino(TEXT("COM5"), true, true);
     Socket frontend("http://localhost:3000");
 
     bool usingInsight;
@@ -77,8 +77,8 @@ int mains() {
 
     std::cout << std::endl;
 
-    Winch * leftWinch = new Winch();
-    Winch * rightWinch = new Winch(REVERSE);
+    Winch* leftWinch = new Winch();
+    Winch* rightWinch = new Winch(REVERSE);
     WireCam wireCam(leftWinch, rightWinch, thisToArduinoSendBuffer);
     
     wireCam.Zero();
@@ -88,12 +88,9 @@ int mains() {
     while (shouldRun) {
 
         //CaptureInput(pilot);
-        //CorrectAxis(pilot, false, true, true, false);
+        CaptureInput(pilot, true);
+        CorrectAxis(pilot, true, true, true, false);
         //CorrectDeadzones(pilot);
-        pilot->trigger = false;
-        pilot->twelve = true;
-        pilot->y = -1.0;
-
         //std::cout << pilot->x << std::endl;
         
         /*
@@ -115,11 +112,12 @@ int mains() {
         if (pilot->trigger) {
 
             wireCam.Stop();
-            std::cout << "User stop detected, press any key to exit..." << std::endl;
-            while (!_kbhit());
+            std::cout << "User stop detected, exiting..." << std::endl;
             return -1;
         }
         else wireCam.Fly(pilot);
+
+        wireCam.UpdateBuffer();
         
         arduino.WriteBytes(thisToArduinoSendBuffer, sizeof(thisToArduinoSendBuffer));
         arduino.ReadBytes(arduinoRXBuffer, 8);
@@ -132,30 +130,30 @@ int mains() {
         if (usingInsight) {
             
             thisToFrontendString = std::to_string(leftWinch->GetPosition()) + std::string("_1") +
-                                std::to_string(rightWinch->GetPosition()) + std::string("_2") +
-                                ((thisToArduinoSendBuffer[0] == 127) ? std::string("idle_3") : ((thisToArduinoSendBuffer[0] < 127) ? std::string("out_3") : std::string("in_3"))) +
-                                ((thisToArduinoSendBuffer[1] == 127) ? std::string("idle_4") : ((thisToArduinoSendBuffer[1] < 127) ? std::string("out_4") : std::string("in_4"))) +
-                                std::string("connected") + std::string("_5") +
-                                std::to_string(wireCam.GetX()) + std::string("_6") +
-                                std::to_string(wireCam.GetY());
+                                   std::to_string(rightWinch->GetPosition()) + std::string("_2") +
+                                   ((thisToArduinoSendBuffer[0] == 127) ? std::string("idle_3") : ((thisToArduinoSendBuffer[0] < 127) ? std::string("out_3") : std::string("in_3"))) +
+                                   ((thisToArduinoSendBuffer[1] == 127) ? std::string("idle_4") : ((thisToArduinoSendBuffer[1] < 127) ? std::string("out_4") : std::string("in_4"))) +
+                                   std::string("connected") + std::string("_5") +
+                                   std::to_string(wireCam.GetX()) + std::string("_6") +
+                                   
+                std::to_string(wireCam.GetY());
             frontend.SendConsoleData(thisToFrontendString);
             Sleep(5);
         }
-        //Sleep(WRITE_SLEEP_TIME);
-        std::cout << "\r" <<
-                     std::to_string(thisToArduinoSendBuffer[0]) + std::string("    ") +
-                     std::to_string(thisToArduinoSendBuffer[1]) + std::string("    ") +
-                     std::to_string(leftWinch->GetPosition()) + std::string("    ") +
-                     std::to_string(rightWinch->GetPosition()) + std::string("    ") +
-                     ((thisToArduinoSendBuffer[0] == 127) ? std::string("idle    ") : ((thisToArduinoSendBuffer[0] < 127) ? std::string("out    ") : std::string("in    "))) +
-                     ((thisToArduinoSendBuffer[1] == 127) ? std::string("idle    ") : ((thisToArduinoSendBuffer[1] < 127) ? std::string("out    ") : std::string("in    "))) +
-                     std::string("connected    ") +
-                     std::to_string(wireCam.GetX()) + std::string("    ") +
-                     std::to_string(wireCam.GetY()) + std::string("    ") +
-                     std::to_string(leftWinch->GetTargetPosition()) + std::string("    ") +
-                     std::to_string(rightWinch->GetTargetPosition()) + std::string("    ") +
-                     std::to_string(leftWinch->TargetPositionSet()) + std::string("    ") +
-                     std::to_string(rightWinch->TargetPositionSet());
+        if (DEBUG) {
+
+            //Sleep(WRITE_SLEEP_TIME);
+            std::cout << "\r" <<
+            std::to_string(thisToArduinoSendBuffer[0]) + std::string("    ") +
+            std::to_string(thisToArduinoSendBuffer[1]) + std::string("    ") +
+            std::to_string(leftWinch->GetPosition()) + std::string("    ") +
+            std::to_string(rightWinch->GetPosition()) + std::string("    ") +
+            ((thisToArduinoSendBuffer[0] == 127) ? std::string("idle    ") : ((thisToArduinoSendBuffer[0] < 127) ? std::string("out    ") : std::string("in    "))) +
+            ((thisToArduinoSendBuffer[1] == 127) ? std::string("idle    ") : ((thisToArduinoSendBuffer[1] < 127) ? std::string("out    ") : std::string("in    "))) +
+            std::string("connected    ") +
+            std::to_string(wireCam.GetX()) + std::string("    ") +
+            std::to_string(wireCam.GetY()) + std::string("    ");
+        }
 
         //Uses short-circuiting to determine if a key was pressed and if it was the escape key
         shouldRun = !(_kbhit() && (int)_getch() == 27) && shouldRun;
