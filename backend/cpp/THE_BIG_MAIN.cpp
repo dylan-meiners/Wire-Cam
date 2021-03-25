@@ -11,17 +11,18 @@
 
 int result = system("CLS");
 
-unsigned char thisToArduinoSendBuffer[2] = {0};
+unsigned char thisToArduinoSendBuffer[3] = { 0 };
 /*
 THIS TO ARDUINO BUFFER IS AS FOLLOWS:
-{[00000000], [00000000]}
+{[00000000], [00000000], [00000000]}
 leftWinchSpeedToSet     unsigned char   (1 byte)
 rightWinchSpeedToSet    unsigned char   (1 byte)
+reset                   unsigned char   (1 byte)
 =================================================
-TOTALS                                  2 bytes
+TOTALS                                  3 bytes
 */
 
-unsigned char arduinoRXBuffer[8] = {0};
+unsigned char arduinoRXBuffer[8] = { 0 };
 int leftEncoderPositionToSet;
 int rightEncoderPositionToSet;
 /*
@@ -51,7 +52,7 @@ int mains() {
 
 int main() {
 
-    ConfigParser parser("T:\\Documents\\Coding\\Coding\\Wire-Cam\\MASTER_CONFIG.txt");
+    ConfigParser parser("T:\\Documents\\Coding\\Coding\\Wire-Cam\\MASTER_CONFIG.ini");
     SerialPort arduino(TEXT("COM5"), true, true);
     Socket frontend("http://localhost:3000");
 
@@ -83,7 +84,7 @@ int main() {
     
     wireCam.Zero();
     wireCam.Stop();
-
+    std::cout << PythagC(WIDTH_FULL_RES / 2.0, HEIGHT_FULL_RES / 2.0) << std::endl;
     bool shouldRun = true;
     while (shouldRun) {
 
@@ -120,6 +121,7 @@ int main() {
         wireCam.UpdateBuffer();
         
         arduino.WriteBytes(thisToArduinoSendBuffer, sizeof(thisToArduinoSendBuffer));
+        thisToArduinoSendBuffer[2] = 0; // Reset the reset byte
         arduino.ReadBytes(arduinoRXBuffer, 8);
 
         memcpy(&leftEncoderPositionToSet, arduinoRXBuffer, 4);
@@ -135,8 +137,7 @@ int main() {
                                    ((thisToArduinoSendBuffer[1] == 127) ? std::string("idle_4") : ((thisToArduinoSendBuffer[1] < 127) ? std::string("out_4") : std::string("in_4"))) +
                                    std::string("connected") + std::string("_5") +
                                    std::to_string(wireCam.GetX()) + std::string("_6") +
-                                   
-                std::to_string(wireCam.GetY());
+                                   std::to_string(wireCam.GetY());
             frontend.SendConsoleData(thisToFrontendString);
             Sleep(5);
         }

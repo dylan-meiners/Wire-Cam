@@ -7,4 +7,4 @@ int RoundLit(long double x) {
     if (x >= 0) { return (x - (int)x >= .5) ? (int)x + 1 : (int)x; }
     else { return -((-x - (int)-x >= .5) ? (int)-x + 1 : (int)-x); }
 }
-double MapUCharToMicroseconds(const double value) { return (value / 255.0) * 1000 + 1000; }
+double MapUCharToMicroseconds(const double value) { return ((value + 1) / 256.0) * 1000 + 1000; }

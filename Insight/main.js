@@ -1,6 +1,6 @@
 const electron = require('electron')
 const { app, BrowserWindow } = require('electron')
-const server = require('./src/js/server')
+const server = require('./src/js/server.js')
 
 electron.Menu.setApplicationMenu(null)
 
@@ -8,7 +8,7 @@ function createWindow() {
     let win = new BrowserWindow({
         width: 1500,
         height: 800,
-        x: 10,
+        x: 1600,
         y: 10,
         /*width: 1500,
         height: 900,

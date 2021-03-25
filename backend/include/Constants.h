@@ -8,18 +8,20 @@ const int ENCODER_CYCLE = 20;
 const double X_DEADZONE = 0.15;
 const double Y_DEADZONE = 0.15;
 const double Z_DEADZONE = 0.15;
-const double TARGET_MAGNITUDE_SCALAR = 50.0;
+const double TARGET_MAGNITUDE_SCALAR = 1.0;
 //It actually is the number of inches per revolution
-const double intelCoreCount = 2.35619449;
-const double inchesToClicksMultiplier = ENCODER_CYCLE / intelCoreCount;
-const double clicksToInchesMultiplier = intelCoreCount / ENCODER_CYCLE;
-const double width = 81;
-const double height = 98.5;
-const int CENTER_POSITION_IN_CLICKS = RoundLit(PythagC(width / 2.0, height / 2.0) * inchesToClicksMultiplier);
+const double INCHES_PER_ENCODER_REV = 2.35619449;
+const double INCHES_TO_CLICKS_MULTIPLIER = ENCODER_CYCLE / INCHES_PER_ENCODER_REV;
+const double CLICKS_TO_INCHES_MULTIPLIER = INCHES_PER_ENCODER_REV / ENCODER_CYCLE;
+const double WIDTH_INCHES = 80.0;
+const double HEIGHT_INCHES = 80.0;
+const double WIDTH_FULL_RES = WIDTH_INCHES * INCHES_TO_CLICKS_MULTIPLIER;
+const double HEIGHT_FULL_RES = HEIGHT_INCHES * INCHES_TO_CLICKS_MULTIPLIER;
+const int CENTER_POSITION_IN_CLICKS = RoundLit(PythagC(WIDTH_FULL_RES / 2.0, HEIGHT_FULL_RES / 2.0));
 
 const double WINCH_1_X = 0.0;
-const double WINCH_1_Y = height;
-const double WINCH_2_X = width;
-const double WINCH_2_Y = height;
+const double WINCH_1_Y = HEIGHT_FULL_RES;
+const double WINCH_2_X = WIDTH_FULL_RES;
+const double WINCH_2_Y = HEIGHT_FULL_RES;
 
 const bool DEBUG = true;

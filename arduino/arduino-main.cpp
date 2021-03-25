@@ -10,17 +10,18 @@
 Encoder* leftEncoder = (Encoder*)malloc(sizeof(*leftEncoder));
 Encoder* rightEncoder = (Encoder*)malloc(sizeof(*rightEncoder));
 
-unsigned char rxBuffer[2] = {0};//(unsigned char*)malloc(2);
+unsigned char rxBuffer[3] = { 0 };
 /*
 RX BUFFER IS AS FOLLOWS:
-{[00000000], [00000000]}
+{[00000000], [00000000], [00000000]}
 leftWinchSpeedToSet     unsigned char   (1 byte)
 rightWinchSpeedToSet    unsigned char   (1 byte)
+reset                   unsigned char   (1 byte)
 =================================================
-TOTALS                                  2 bytes
+TOTALS                                  3 bytes
 */
 
-unsigned char txBuffer[8] = {0};
+unsigned char txBuffer[8] = { 0 };
 long leftMotorPositionToSend;
 long rightMotorPositionToSend;
 /*
@@ -34,6 +35,7 @@ TOTALS                              8 bytes
 
 int leftSpeedToSet = 127;
 int rightSpeedToSet = 127;
+bool resetToSet = false;
 
 Servo leftMotor;
 Servo rightMotor;
@@ -74,10 +76,11 @@ void setup() {
 
 void loop() {
 
-    if (Serial.available() >= 2) {
+    if (Serial.available() >= 3) {
         
         leftSpeedToSet = (int)Serial.read();
         rightSpeedToSet = (int)Serial.read();
+        resetToSet = (bool)Serial.read();
         clearSerial();
         shouldWrite = true;
     }
@@ -92,6 +95,11 @@ void loop() {
     leftEncoder->VirtualUpdate();
     rightEncoder->VirtualUpdate();
     #endif
+    if (resetToSet) {
+
+        leftEncoder->Reset();
+        rightEncoder->Reset();
+    }
 
     if (shouldWrite) {
         

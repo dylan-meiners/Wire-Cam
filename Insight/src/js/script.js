@@ -1,7 +1,14 @@
 window.$ = window.jQuery = require('jquery')
 
-var WIDTH = 81;
-var HEIGHT = 98.5;
+//It actually is the number of inches per revolution
+var ENCODER_CYCLE = 20;
+var INCHES_PER_ENCODER_REV = 2.35619449;
+var INCHES_TO_CLICKS_MULTIPLIER = ENCODER_CYCLE / INCHES_PER_ENCODER_REV;
+var CLICKS_TO_INCHES_MULTIPLIER = INCHES_PER_ENCODER_REV / ENCODER_CYCLE;
+var WIDTH_INCHES = 80.0;
+var HEIGHT_INCHES = 80.0;
+var WIDTH = WIDTH_INCHES * INCHES_TO_CLICKS_MULTIPLIER;
+var HEIGHT = HEIGHT_INCHES * INCHES_TO_CLICKS_MULTIPLIER;
 
 var activePage = "";
 var old_active_a = ".dashboard_a"

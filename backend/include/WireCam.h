@@ -7,6 +7,7 @@
 #include "Constants.h"
 #include <vector>
 #include <math.h>
+#include <Windows.h>
 
 class WireCam {
 
@@ -29,6 +30,7 @@ class WireCam {
 
             m_leftWinch->Zero();
             m_rightWinch->Zero();
+            m_thisToArduinoSendBuffer[2] = 1;
         }
 
         void UpdateBuffer() {
@@ -39,22 +41,22 @@ class WireCam {
 
         double GetArcCosTopLeftAngle() {
 
-            double b = m_leftWinch->GetPosition() * clicksToInchesMultiplier;
-            return 90 - Degrees(acos((sq(m_rightWinch->GetPosition() * clicksToInchesMultiplier) -
+            double b = m_leftWinch->GetPosition();
+            return 90 - Degrees(acos((sq(m_rightWinch->GetPosition()) -
                                       sq(b) -
-                                      sq(width)) / (-2 * width * b)));
+                                      sq(WIDTH_FULL_RES)) / (-2 * WIDTH_FULL_RES * b)));
         }
 
-        //returns x position in inches
+        //returns x position
         double GetX() {
 
-            return m_leftWinch->GetPosition() * clicksToInchesMultiplier * sin(Radians(GetArcCosTopLeftAngle()));
+            return m_leftWinch->GetPosition() * sin(Radians(GetArcCosTopLeftAngle()));
         }
 
-        //returns y position in inches
+        //returns y position
         double GetY() {
 
-            return m_leftWinch->GetPosition() * clicksToInchesMultiplier * cos(Radians(GetArcCosTopLeftAngle()));
+            return m_leftWinch->GetPosition() * cos(Radians(GetArcCosTopLeftAngle()));
         }
 
         void Jog(LogitechExtreme3DPro * pilot) {
@@ -90,6 +92,7 @@ class WireCam {
             double targetX = cos(angle * (M_PI / 180.0)) * magnitude * TARGET_MAGNITUDE_SCALAR;
             double targetY = sin(angle * (M_PI / 180.0)) * magnitude * TARGET_MAGNITUDE_SCALAR;
             std::vector<std::vector<double>> system;
+
             system.push_back(std::vector<double>());
             system[0].push_back(WINCH_1_X - GetX());
             system[0].push_back(WINCH_2_X - GetX());
@@ -98,13 +101,32 @@ class WireCam {
             system[1].push_back(WINCH_1_Y - GetY());
             system[1].push_back(WINCH_2_Y - GetY());
             system[1].push_back(targetY);
+
+            double lMagnitude = PythagC(system[0][0], system[1][0]);
+            double rMagnitude = PythagC(system[0][1], system[1][1]);
+
+            /*std::cout << std::endl << "System" << std::endl;
+            PrintVector(system);
+            std::cout << std::endl;*/
+
             std::vector<std::vector<double>> solved = rref(system);
-            //PrintVector(solved);
-            //std::cout << std::endl;
-            double x = solved[0][2];
-            double y = solved[1][2];
-            m_leftWinch->Set(x);
-            m_rightWinch->Set(y);
+
+            /*std::cout << "Solved" << std::endl;
+            PrintVector(solved);
+            std::cout << std::endl;*/
+
+            double lScalar = solved[0][2];
+            double rScalar = solved[1][2];
+            double lSpeed = lScalar * lMagnitude;
+            double rSpeed = rScalar * rMagnitude;
+
+            /*std::cout << "Left Speed: " << lSpeed << std::endl;
+            std::cout << "Right Speed: " << rSpeed << std::endl;
+            std::cout << std::endl;*/
+
+            m_leftWinch->Set(lSpeed);
+            m_rightWinch->Set(rSpeed);
+            //Sleep(1000);
         }
 
         void Fly(LogitechExtreme3DPro * pilot) {

@@ -18,6 +18,12 @@ class Encoder {
             #endif
         }
 
+        void Reset() {
+
+            m_position = 0;
+            m_precisePosition = 0;
+        }
+
         #ifndef VIRTUAL_WINCHES
         void Update() {
 
