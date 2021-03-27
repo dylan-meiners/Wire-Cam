@@ -53,7 +53,7 @@ int mains() {
 int main() {
 
     ConfigParser parser("T:\\Documents\\Coding\\Coding\\Wire-Cam\\MASTER_CONFIG.ini");
-    SerialPort arduino(TEXT("COM5"), true, true);
+    SerialPort arduino(TEXT("COM4"), true, true);
     Socket frontend("http://localhost:3000");
 
     bool usingInsight;

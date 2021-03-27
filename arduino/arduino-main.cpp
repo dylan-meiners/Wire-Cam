@@ -1,4 +1,4 @@
-#define VIRTUAL_WINCHES
+//#define VIRTUAL_WINCHES
 
 #include "Arduino.h"
 #include "Servo.h"

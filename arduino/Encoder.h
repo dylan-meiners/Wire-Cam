@@ -21,7 +21,9 @@ class Encoder {
         void Reset() {
 
             m_position = 0;
+            #ifdef VIRTUAL_WINCHES
             m_precisePosition = 0;
+            #endif
         }
 
         #ifndef VIRTUAL_WINCHES
